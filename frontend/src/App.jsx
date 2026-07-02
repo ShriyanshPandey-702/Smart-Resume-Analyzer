@@ -17,10 +17,34 @@ function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [dragActive, setDragActive] = useState(false);
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
     setResult(null);
+  };
+
+  const handleDrag = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (e.type === "dragenter" || e.type === "dragover") {
+    setDragActive(true);
+  } else if (e.type === "dragleave") {
+    setDragActive(false);
+  }
+};
+
+const handleDrop = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setDragActive(false);
+
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    setSelectedFile(e.dataTransfer.files[0]);
+    setResult(null);
+  }
   };
 
   const handleUpload = async () => {
@@ -151,11 +175,20 @@ function App() {
 
           <label
             htmlFor="resume-input"
-            className="flex flex-col items-center justify-center gap-4 w-full border-2 border-dashed border-white/15 rounded-xl p-8 sm:p-10 cursor-pointer hover:border-white/30 hover:bg-white/[0.03] transition-all duration-300 group"
+            onDragEnter={handleDrag}
+            onDragOver={handleDrag}
+            onDragLeave={handleDrag}
+            onDrop={handleDrop}
+            className={`flex flex-col items-center justify-center gap-4 w-full border-2 border-dashed rounded-xl p-8 sm:p-10 cursor-pointer transition-all duration-300 group 
+            ${dragActive ? "border-cyan-400 bg-cyan-500/10" : "border-white/15 hover:border-white/30 hover:bg-white/[0.03]"}`}
           >
             <div className="w-14 h-14 rounded-full bg-white/[0.06] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <svg
-                className="w-7 h-7 text-gray-400 group-hover:text-white transition-colors duration-300"
+                className={`w-7 h-7 transition-colors duration-300 ${
+                    dragActive
+                        ? "text-cyan-400"
+                        : "text-gray-400 group-hover:text-white"
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -178,11 +211,33 @@ function App() {
               </div>
             ) : (
               <div className="text-center">
-                <p className="text-gray-300 text-sm">
-                  Upload Candidate Resume, or{" "}
-                  <span className="text-white underline underline-offset-2">browse</span>
-                </p>
-                <p className="text-gray-600 text-xs mt-1">Supports PDF, DOC, DOCX</p>
+
+                {dragActive ? (
+                  <>
+                    <p className="text-lg font-semibold text-cyan-400">
+                      📄 Drag & Drop Resume Here
+                    </p>
+
+                    <p className="text-sm text-gray-400 mt-2">
+                      Release to upload
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-300 text-sm">
+                      📄 Drop Resume Here
+                    </p>
+
+                    <p className="text-white text-sm mt-2">
+                      or Click to Upload
+                    </p>
+
+                    <p className="text-gray-600 text-xs mt-3">
+                      Supports PDF, DOC, DOCX
+                    </p>
+                  </>
+                )}
+
               </div>
             )}
 

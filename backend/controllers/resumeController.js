@@ -12,7 +12,7 @@ const getResume = async (req, res) => {
         }
 
         const { jobDescription } = req.body;
-        console.log(jobDescription);
+        // console.log(jobDescription);
 
         const result = await analyzeResume(req.file, jobDescription);
 
