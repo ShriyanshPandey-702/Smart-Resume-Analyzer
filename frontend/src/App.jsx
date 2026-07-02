@@ -1,5 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+
+const loadingSteps = [
+  "📄 Uploading Resume...",
+  "📖 Extracting Resume Text...",
+  "📝 Reading Job Description...",
+  "🤖 Comparing Resume with Job Description...",
+  "📊 Calculating Match Score...",
+  "✨ Preparing Recruiter Report..."
+  ];
 
 function App() {
 
@@ -7,6 +16,7 @@ function App() {
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -26,6 +36,7 @@ function App() {
     }
 
     setResult(null);
+    setLoadingStep(0);
     setLoading(true);
 
     const formData = new FormData();
@@ -63,6 +74,25 @@ function App() {
 
   };
 
+  useEffect(() => {
+
+  if (!loading) {
+    setLoadingStep(0);
+    return;
+  }
+
+  let current = 0;
+
+  const interval = setInterval(() => {
+    current++;
+    if (current < loadingSteps.length) {
+      setLoadingStep(current);
+    }
+  }, 1200);
+  return () => clearInterval(interval);
+  }, [loading]);
+
+
   const formatFileSize = (bytes) => {
     if (bytes < 1024 * 1024) {
       return `${(bytes / 1024).toFixed(1)} KB`;
@@ -80,20 +110,17 @@ function App() {
           stroke: "#10b981",
           text: "text-emerald-400",
           badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-          label: "Excellent",
         }
       : score >= 70
       ? {
           stroke: "#38bdf8",
           text: "text-sky-400",
           badge: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-          label: "Good",
         }
       : {
           stroke: "#f59e0b",
           text: "text-amber-400",
           badge: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-          label: "Needs Work",
         };
 
   return (
@@ -221,7 +248,7 @@ function App() {
           disabled={loading || !selectedFile || !jobDescription.trim()}
           className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm bg-white text-black hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] active:translate-y-0 mb-6"
         >
-          {loading ? "Analyzing..." : "Analyze Match →"}
+          {loading ? "Processing..." : "Analyze Match →"}
         </button>
 
         {/* Loading */}
@@ -232,8 +259,27 @@ function App() {
               <div className="absolute inset-0 rounded-full border-2 border-t-white border-r-transparent border-b-transparent border-l-transparent animate-spin" />
             </div>
             <div className="text-center">
-              <p className="text-white font-medium">Analyzing Resume...</p>
-              <p className="text-gray-500 text-sm mt-1">This may take a few seconds.</p>
+              <p className="text-white font-semibold">
+                  {loadingSteps[loadingStep]}
+              </p>
+
+              <p className="text-gray-500 text-sm mt-2">
+                  Please wait while our AI recruiter analyzes the candidate profile.
+              </p>
+
+              <div className="w-full bg-white/10 rounded-full h-2 mt-6 overflow-hidden">
+                  <div
+                      className="bg-indigo-500 h-2 rounded-full transition-all duration-700"
+                      style={{
+                          width: `${((loadingStep + 1) / loadingSteps.length) * 100}%`
+                      }}
+                  />
+              </div>
+
+              <p className="text-xs text-gray-500 mt-2">
+                  Step {loadingStep + 1} of {loadingSteps.length}
+              </p>
+
             </div>
           </div>
         )}

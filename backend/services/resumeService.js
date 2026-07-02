@@ -129,7 +129,7 @@ const analyzeResume = async (file, jobDescription) => {
     text = text.replace(/```json/g, "");
     text = text.replace(/```/g, "").trim();
 
-    console.log(text);
+    // console.log(text);
 
     try {
         return JSON.parse(text);
