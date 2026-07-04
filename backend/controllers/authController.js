@@ -114,14 +114,10 @@ const forgotPassword = async (req, res) => {
     await user.save();
 
     const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
-    console.log(`\n========================================`);
-    console.log(`Password Reset Link for ${user.email}:`);
-    console.log(resetUrl);
-    console.log(`========================================\n`);
-
     res.json({
       success: true,
-      message: "Password reset link has been sent to your email.",
+      message: "Reset link generated successfully.",
+      resetUrl: resetUrl,
     });
 
   } catch (error) {

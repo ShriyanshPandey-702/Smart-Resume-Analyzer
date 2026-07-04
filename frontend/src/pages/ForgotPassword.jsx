@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FiCopy, FiExternalLink } from "react-icons/fi";
 import { useTheme } from "../context/ThemeContext";
 
 function ForgotPassword() {
@@ -33,8 +34,8 @@ function ForgotPassword() {
         "http://localhost:5001/api/auth/forgot-password",
         { email }
       );
-      toast.success(response.data.message || "Reset link sent");
-      setSuccess(true);
+      toast.success(response.data.message || "Reset link generated");
+      setSuccess(response.data.resetUrl);
     } catch (err) {
       if (err.response?.status === 404) {
         setError("User not found with this email");
@@ -80,25 +81,60 @@ function ForgotPassword() {
         </div>
 
         {success ? (
-          <div className="text-center">
+          <div className="text-center fade-in-up">
             <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
               <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
+            <h2 className={`text-xl font-bold mb-2 ${primaryText}`}>Password Reset Link Generated</h2>
             <p className={`mb-6 text-sm ${secondaryText}`}>
-              If an account exists for <span className={primaryText}>{email}</span>, you will receive password reset instructions.
+              A secure reset link has been generated. Since this demo project does not use an email service, you can copy or open the link below to continue.
             </p>
-            <Link
-              to="/login"
-              className={`w-full inline-block py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-200 
-                ${theme === "dark" 
-                  ? "bg-white text-black hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-white/10" 
-                  : "bg-indigo-600 text-white hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30"} 
-                hover:scale-[1.01] active:scale-[0.99] active:translate-y-0`}
-            >
-              Return to Login
-            </Link>
+            
+            <div className={`flex items-center gap-2 p-3 rounded-xl border mb-6 text-left ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200"}`}>
+              <input
+                type="text"
+                readOnly
+                value={success}
+                className={`w-full bg-transparent text-sm outline-none ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(success);
+                  toast.success("Link copied to clipboard!");
+                }}
+                className={`p-2 rounded-lg transition-colors ${theme === "dark" ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-200 text-gray-500 hover:text-gray-900"}`}
+                title="Copy Link"
+              >
+                <FiCopy size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <a
+                href={success}
+                className={`w-full inline-flex justify-center items-center gap-2 py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-200 
+                  ${theme === "dark" 
+                    ? "bg-white text-black hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-white/10" 
+                    : "bg-indigo-600 text-white hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30"} 
+                  hover:scale-[1.01] active:scale-[0.99] active:translate-y-0`}
+              >
+                <FiExternalLink size={16} />
+                Open Reset Password
+              </a>
+              <Link
+                to="/login"
+                className={`w-full inline-block py-3.5 px-6 rounded-xl font-semibold text-sm transition-colors duration-200 border
+                  ${theme === "dark" 
+                    ? "border-white/10 text-gray-300 hover:bg-white/5" 
+                    : "border-gray-200 text-gray-700 hover:bg-gray-50"} 
+                  `}
+              >
+                Return to Login
+              </Link>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
