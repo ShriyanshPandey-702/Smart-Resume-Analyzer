@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import jsPDF from "jspdf";
 import jobTemplates from "../assets/jobTemplates";
+import ConfirmationModal from "../components/ConfirmationModal";
 import { useTheme } from "../context/ThemeContext";
 import {
   FiSun,
@@ -38,6 +39,18 @@ function Dashboard() {
   const [dragActive, setDragActive] = useState(false);
   const [history, setHistory] = useState([]);
   const { theme, toggleTheme } = useTheme();
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "Delete",
+    isDestructive: true,
+    onConfirm: () => {},
+  });
+
+  const openModal = (config) => setModalConfig({ ...config, isOpen: true });
+  const closeModal = () => setModalConfig((prev) => ({ ...prev, isOpen: false }));
 
   const resultRef = useRef(null);
 
@@ -150,6 +163,26 @@ const handleDrop = (e) => {
   setHistory([]);
 
   localStorage.removeItem("analysisHistory");
+  };
+
+  const confirmDeleteHistoryItem = (id) => {
+    openModal({
+      title: "Delete Analysis",
+      description: "Are you sure you want to delete this analysis from your history? This action cannot be undone.",
+      confirmText: "Delete",
+      isDestructive: true,
+      onConfirm: () => deleteHistoryItem(id)
+    });
+  };
+
+  const confirmClearHistory = () => {
+    openModal({
+      title: "Clear All History",
+      description: "Are you sure you want to clear your entire analysis history? This action cannot be undone.",
+      confirmText: "Clear All",
+      isDestructive: true,
+      onConfirm: clearHistory
+    });
   };
 
   // Loading animation
@@ -343,8 +376,16 @@ const handleDrop = (e) => {
   };
 
   const handleLogout = () => {
-  localStorage.removeItem("token");
-  navigate("/login");
+    openModal({
+      title: "Confirm Logout",
+      description: "Are you sure you want to log out? You will need to sign in again to access your analysis history.",
+      confirmText: "Logout",
+      isDestructive: true,
+      onConfirm: () => {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    });
   };
 
   const circumference = 339.29;
@@ -416,7 +457,12 @@ const handleDrop = (e) => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition">
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border
+              ${theme === "dark" 
+                ? "bg-white/[0.04] border-white/10 text-gray-300 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
+                : "bg-white border-gray-300 text-gray-700 hover:border-red-500/50 hover:text-red-600 hover:bg-red-50"}
+            `}
+          >
             <FiLogOut />
             <span>Logout</span>
           </button>
@@ -694,50 +740,83 @@ const handleDrop = (e) => {
         )}
 
         {/* Analysis History */}
-        {history.length > 0 && (
-          <div className={`rounded-2xl ${cardClass} backdrop-blur-sm p-6 mb-6`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className={`text-lg font-semibold ${primaryText}`}>🕒 Recent Analyses</h2>
-              <button onClick={clearHistory} className="text-sm text-red-400 hover:text-red-300 transition">Clear All</button>
-            </div>
+        {/* Analysis History */}
+        <div className={`rounded-2xl ${cardClass} backdrop-blur-sm p-6 mb-6`}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className={`text-lg font-semibold ${primaryText}`}>🕒 Recent Analyses</h2>
+            {history.length > 0 && (
+              <button 
+                onClick={confirmClearHistory} 
+                className={`text-sm px-3 py-1.5 rounded-lg transition-all duration-200 border font-medium
+                  ${theme === "dark"
+                    ? "border-transparent text-gray-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20"
+                    : "border-transparent text-gray-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200"}
+                `}
+              >
+                Clear All
+              </button>
+            )}
+          </div>
 
+          {history.length === 0 ? (
+            <div className={`flex flex-col items-center justify-center py-10 px-4 text-center rounded-xl border border-dashed ${theme === "dark" ? "border-white/10 bg-white/[0.02]" : "border-gray-200 bg-gray-50"}`}>
+              <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center mb-3">
+                <FiClock className="w-5 h-5 text-indigo-400" />
+              </div>
+              <p className={`text-sm font-medium ${primaryText}`}>No recent analyses yet</p>
+              <p className={`text-xs mt-1 ${secondaryText}`}>Your past resume scans will appear here.</p>
+            </div>
+          ) : (
             <div className="space-y-3">
               {history.map((item) => (
                 <div
                     key={item.id}
-                    className={`w-full rounded-xl p-4 ${theme === "dark"? "border border-white/10 bg-white/[0.03]" : "border border-gray-200 bg-gray-50"}`}>
+                    className={`w-full rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg
+                      ${theme === "dark"? "border border-white/10 bg-white/[0.03] hover:shadow-white/5" : "border border-gray-200 bg-gray-50 hover:shadow-gray-200"}
+                    `}
+                >
                   <div className="flex justify-between items-center">
                     <div>
                       <p className={`font-medium ${primaryText}`}>{item.jobTitle}</p>
                       <p className="text-xs text-gray-500 mt-1">{item.date}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold text-indigo-400">{item.score}%
-                      </p>
-                      <p className="text-xs text-gray-400">{item.recommendation}
-                      </p>
+                      <p className="text-xl font-bold text-indigo-400">{item.score}%</p>
+                      <p className="text-xs text-gray-400">{item.recommendation}</p>
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 mt-4">
-                  <button
-                    onClick={() =>
-                      setResult({
-                        success: true,
-                        analysis: item.analysis,
-                      })
-                    }
-                    className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm">Open</button>
-
-                  <button
-                    onClick={() => deleteHistoryItem(item.id)}
-                    className="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm">Delete</button>
-
+                    <button
+                      onClick={() =>
+                        setResult({
+                          success: true,
+                          analysis: item.analysis,
+                        })
+                      }
+                      className={`px-4 py-1.5 rounded-lg text-sm transition-all duration-200 border font-medium
+                        ${theme === "dark"
+                          ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/50"
+                          : "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300"}
+                      `}
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => confirmDeleteHistoryItem(item.id)}
+                      className={`px-4 py-1.5 rounded-lg text-sm transition-all duration-200 border font-medium
+                        ${theme === "dark"
+                          ? "border-white/10 text-gray-400 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                          : "border-gray-200 text-gray-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600"}
+                      `}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
 
         {/* Results */}
@@ -975,6 +1054,16 @@ const handleDrop = (e) => {
         </p>
 
       </div>
+
+      <ConfirmationModal 
+        isOpen={modalConfig.isOpen}
+        onClose={closeModal}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        confirmText={modalConfig.confirmText}
+        isDestructive={modalConfig.isDestructive}
+        onConfirm={modalConfig.onConfirm}
+      />
     </div>
   );
 }
