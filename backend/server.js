@@ -11,7 +11,15 @@ const app = express();
 
 connectDB();
 
-app.use(cors());  //This allows your React app (localhost:5173) to talk to your backend.
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+    ],
+    credentials: true,
+  })
+);  //This allows your React app (localhost:5173) to talk to your backend.
 app.use(express.json());  //Express automatically converts the JSON into a JavaScript object.
 app.use("/api/resume", resumeRoutes);
 app.use("/api/auth", authRoutes);
