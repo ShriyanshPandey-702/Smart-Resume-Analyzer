@@ -49,7 +49,7 @@ function Login() {
 
       localStorage.setItem("token", response.data.token);
       toast.success("Login Successful");
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login Failed");
     } finally {
@@ -83,7 +83,7 @@ function Login() {
             Welcome Back
           </h1>
           <p className={`text-sm ${secondaryText}`}>
-            Log in to Smart Resume Analyzer
+            Log in to Hirely
           </p>
         </div>
 

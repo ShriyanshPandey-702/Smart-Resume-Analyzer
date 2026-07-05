@@ -127,9 +127,27 @@ h1, h2, h3, h4, .font-display {
   background: var(--accent);
   color: var(--accent-ink);
   border-radius: var(--radius);
-  transition: filter 0.18s ease, transform 0.18s ease;
+  transition: filter 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
-.btn-accent:hover { filter: brightness(1.08); }
+.btn-accent:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px var(--accent);
+}
+.btn-accent:active { transform: translateY(0); }
+
+/* Interactive card: lifts and highlights on hover */
+.card-hover {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-accent:hover, .card-hover:hover { transform: none; }
+}
 
 .chip-match {
   background: var(--chip-match-bg);

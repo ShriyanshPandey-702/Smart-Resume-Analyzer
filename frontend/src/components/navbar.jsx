@@ -16,7 +16,7 @@ import {
 } from "react-icons/fi";
 
 const links = [
-  { to: "/", label: "Dashboard", icon: FiHome, end: true },
+  { to: "/dashboard", label: "Dashboard", icon: FiHome, end: true },
   { to: "/history", label: "History", icon: FiClock },
   { to: "/profile", label: "Profile", icon: FiUser },
   { to: "/settings", label: "Settings", icon: FiSettings },
@@ -49,7 +49,7 @@ function Navbar() {
 
   const doLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   const linkBase =
@@ -71,12 +71,10 @@ function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Brand */}
-            <NavLink to="/" className="flex items-center gap-2.5 flex-shrink-0">
-              <div className="w-8 h-8 rounded-[var(--radius)] bg-[var(--accent)] flex items-center justify-center text-[var(--accent-ink)] font-bold text-sm">
-                R
-              </div>
-              <span className="font-display font-semibold tracking-tight hidden sm:block text-[var(--ink)]">
-                Resume Analyzer
+            <NavLink to="/dashboard" className="flex items-center gap-2.5 flex-shrink-0">
+              <img src="/Hirely_icon.png" alt="" className="h-8 w-8 object-contain" />
+              <span className="font-display font-semibold tracking-tight text-lg hidden sm:block text-[var(--ink)]">
+                Hirely
               </span>
             </NavLink>
 

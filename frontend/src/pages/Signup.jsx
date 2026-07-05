@@ -119,7 +119,7 @@ function Signup() {
             Create Account
           </h1>
           <p className={`text-sm ${secondaryText}`}>
-            Join Smart Resume Analyzer today
+            Join Hirely today
           </p>
         </div>
 

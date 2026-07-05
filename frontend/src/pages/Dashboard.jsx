@@ -329,7 +329,7 @@ const handleDrop = (e) => {
       isDestructive: true,
       onConfirm: () => {
         localStorage.removeItem("token");
-        navigate("/login");
+        navigate("/");
       }
     });
   };
@@ -346,7 +346,7 @@ const handleDrop = (e) => {
 
           localStorage.removeItem("token");
           toast.success("Account deleted successfully");
-          navigate("/login");
+          navigate("/");
         } catch (error) {
           if (error.response?.status === 401) {
             toast.error("Session expired. Please log in again.");
@@ -388,11 +388,7 @@ const handleDrop = (e) => {
 
         {/* Hero */}
         <div className="text-center mb-12">
-          <p className="eyebrow mb-4">AI Recruiter Assistant</p>
-
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight mb-4 leading-tight text-[var(--ink)]">
-            Smart Resume Analyzer
-          </h1>
+          <img src="/Hirely_lockup.png" alt="Hirely" className="w-full max-w-[220px] sm:max-w-[240px] mx-auto mb-5" />
 
           <p className={`${secondaryText} text-base sm:text-lg max-w-xl mx-auto leading-relaxed`}>
             Upload a resume and paste a job description to receive an AI-powered candidate match analysis.

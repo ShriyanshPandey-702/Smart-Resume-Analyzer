@@ -86,7 +86,7 @@ function Settings() {
           await api.delete("/auth/delete-account");
           localStorage.removeItem("token");
           toast.success("Account deleted successfully");
-          navigate("/login");
+          navigate("/");
         } catch (error) {
           toast.error(error.response?.data?.message || "Failed to delete account");
         }
