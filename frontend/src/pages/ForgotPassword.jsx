@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FiCopy, FiExternalLink } from "react-icons/fi";
@@ -30,10 +30,7 @@ function ForgotPassword() {
     setError("");
 
     try {
-      const response = await axios.post(
-        "https://smart-resume-analyzer-1n57.onrender.com/api/auth/forgot-password",
-        { email }
-      );
+      const response = await api.post("/auth/forgot-password", { email });
       toast.success(response.data.message || "Reset link generated");
       setSuccess(response.data.resetUrl);
     } catch (err) {

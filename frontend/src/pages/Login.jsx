@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -45,10 +45,7 @@ function Login() {
 
     setLoading(true);
     try {
-      const response = await axios.post(
-        "https://smart-resume-analyzer-1n57.onrender.com/api/auth/login",
-        formData
-      );
+      const response = await api.post("/auth/login", formData);
 
       localStorage.setItem("token", response.data.token);
       toast.success("Login Successful");

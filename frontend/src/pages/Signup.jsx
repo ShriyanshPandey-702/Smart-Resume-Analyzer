@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -77,14 +77,11 @@ function Signup() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://smart-resume-analyzer-1n57.onrender.com/api/auth/register",
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }
-      );
+      const response = await api.post("/auth/register", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
 
       toast.success(response.data.message);
       navigate("/login");

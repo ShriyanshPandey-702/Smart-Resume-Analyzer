@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import jsPDF from "jspdf";
 import jobTemplates from "../assets/jobTemplates";
 import ConfirmationModal from "../components/ConfirmationModal";
+import Navbar from "../components/navbar";
 import { useTheme } from "../context/ThemeContext";
 import { toast } from "react-toastify";
 import {
@@ -84,6 +85,16 @@ const handleDrop = (e) => {
   }
   };
 
+  // Load the user's analysis history from the database
+  const fetchHistory = async () => {
+    try {
+      const { data } = await api.get("/resume/history");
+      setHistory(data.history || []);
+    } catch (error) {
+      console.error("Failed to load history:", error);
+    }
+  };
+
   const handleUpload = async () => {
 
     if (!selectedFile) {
@@ -103,23 +114,15 @@ const handleDrop = (e) => {
     const formData = new FormData();
     formData.append("resume", selectedFile);
     formData.append("jobDescription", jobDescription);
+    formData.append("jobTitle", selectedTemplate || "Custom Job Description");
 
     try {
-      const response = await axios.post("https://smart-resume-analyzer-1n57.onrender.com/api/resume/upload",formData);
+      const response = await api.post("/resume/upload", formData);
       setResult(response.data);
 
       if (response.data.success) {
-      const newHistoryItem = {
-        id: Date.now(),
-        jobTitle: selectedTemplate || "Custom Job Description",
-        score: response.data.analysis.matchScore,
-        recommendation: response.data.analysis.recommendation,
-        analysis: response.data.analysis,
-        date: new Date().toLocaleString(),
-      };
-      const updatedHistory = [newHistoryItem,...history].slice(0, 5);
-      setHistory(updatedHistory);
-      localStorage.setItem("analysisHistory",JSON.stringify(updatedHistory));
+        // The backend already persisted this analysis; refresh from the DB
+        fetchHistory();
       }
 
     } catch (error) {
@@ -148,23 +151,26 @@ const handleDrop = (e) => {
   handleUpload();
   };
 
-  // Delete History
-  const deleteHistoryItem = (id) => {
-  const updatedHistory = history.filter((item) => item.id !== id);
-
-  setHistory(updatedHistory);
-
-  localStorage.setItem(
-    "analysisHistory",
-    JSON.stringify(updatedHistory)
-  );
+  // Delete a single analysis from the database
+  const deleteHistoryItem = async (id) => {
+    try {
+      await api.delete(`/resume/history/${id}`);
+      setHistory((prev) => prev.filter((item) => item._id !== id));
+      toast.success("Analysis deleted");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete analysis");
+    }
   };
 
-  // clear history
-  const clearHistory = () => {
-  setHistory([]);
-
-  localStorage.removeItem("analysisHistory");
+  // Clear all analyses from the database
+  const clearHistory = async () => {
+    try {
+      await api.delete("/resume/history");
+      setHistory([]);
+      toast.success("History cleared");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to clear history");
+    }
   };
 
   const confirmDeleteHistoryItem = (id) => {
@@ -218,8 +224,7 @@ const handleDrop = (e) => {
   }, [loading, result]);
 
   useEffect(() => {
-  const savedHistory = JSON.parse(localStorage.getItem("analysisHistory")) || [];
-  setHistory(savedHistory);
+  fetchHistory();
   }, []);
 
   const formatFileSize = (bytes) => {
@@ -398,13 +403,9 @@ const handleDrop = (e) => {
       isDestructive: true,
       onConfirm: async () => {
         try {
-          const token = localStorage.getItem("token");
-          await axios.delete("https://smart-resume-analyzer-1n57.onrender.com/api/auth/delete-account", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
+          await api.delete("/auth/delete-account");
+
           localStorage.removeItem("token");
-          localStorage.removeItem("analysisHistory");
           toast.success("Account deleted successfully");
           navigate("/login");
         } catch (error) {
@@ -470,50 +471,11 @@ const handleDrop = (e) => {
 
       <div className={`fixed inset-0 pointer-events-none ${theme === "dark"? "bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,_rgba(99,102,241,0.12),_transparent)]": "bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,_rgba(99,102,241,0.06),_transparent)]"}`}/>
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 pt-8 pb-16 sm:pt-10 sm:pb-24">
+      <div className="relative z-10">
 
-        <div className="flex justify-end gap-3 mb-6">
-          
-          <button onClick={toggleTheme} className={`flex items-center gap-2 px-4 py-2 rounded-lg transition${
-              theme === "dark"
-                ? "bg-white/5 border border-white/10 text-white hover:bg-white/10"
-                : "bg-white border border-gray-300 text-gray-800 hover:bg-gray-100"
-            }`}>
-            <>
-              {theme === "dark" ? <FiSun /> : <FiMoon />}
-              <span className="hidden sm:inline">
-                {theme === "dark"
-                  ? "Light Mode"
-                  : "Dark Mode"}
-              </span>
-            </>
-          </button>
+        <Navbar />
 
-          <button
-            onClick={confirmDeleteAccount}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border
-              ${theme === "dark" 
-                ? "bg-white/[0.04] border-white/10 text-gray-300 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
-                : "bg-white border-gray-300 text-gray-700 hover:border-red-500/50 hover:text-red-600 hover:bg-red-50"}
-            `}
-          >
-            <FiUserX />
-            <span className="hidden sm:inline">Delete Account</span>
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border
-              ${theme === "dark" 
-                ? "bg-white/[0.04] border-white/10 text-gray-300 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
-                : "bg-white border-gray-300 text-gray-700 hover:border-red-500/50 hover:text-red-600 hover:bg-red-50"}
-            `}
-          >
-            <FiLogOut />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-
-        </div>
+        <div className="max-w-2xl mx-auto px-4 pt-8 pb-16 sm:pt-10 sm:pb-24">
 
         {/* Hero */}
         <div className="text-center mb-12">
@@ -817,7 +779,7 @@ const handleDrop = (e) => {
             <div className="space-y-3">
               {history.map((item) => (
                 <div
-                    key={item.id}
+                    key={item._id}
                     className={`w-full rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg
                       ${theme === "dark"? "border border-white/10 bg-white/[0.03] hover:shadow-white/5" : "border border-gray-200 bg-gray-50 hover:shadow-gray-200"}
                     `}
@@ -825,10 +787,12 @@ const handleDrop = (e) => {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className={`font-medium ${primaryText}`}>{item.jobTitle}</p>
-                      <p className="text-xs text-gray-500 mt-1">{item.date}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : ""}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold text-indigo-400">{item.score}%</p>
+                      <p className="text-xl font-bold text-indigo-400">{item.matchScore}%</p>
                       <p className="text-xs text-gray-400">{item.recommendation}</p>
                     </div>
                   </div>
@@ -849,7 +813,7 @@ const handleDrop = (e) => {
                       Open
                     </button>
                     <button
-                      onClick={() => confirmDeleteHistoryItem(item.id)}
+                      onClick={() => confirmDeleteHistoryItem(item._id)}
                       className={`px-4 py-1.5 rounded-lg text-sm transition-all duration-200 border font-medium
                         ${theme === "dark"
                           ? "border-white/10 text-gray-400 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
@@ -1100,9 +1064,11 @@ const handleDrop = (e) => {
           Built with React • Express • Tailwind CSS • Gemini AI
         </p>
 
+        </div>
+
       </div>
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalConfig.isOpen}
         onClose={closeModal}
         title={modalConfig.title}

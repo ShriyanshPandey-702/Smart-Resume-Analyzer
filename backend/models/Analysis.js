@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const analysisSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+
     jobTitle: {
       type: String,
       default: "Custom Job Description",
