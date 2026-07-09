@@ -28,6 +28,10 @@
   --score-mid: #a8781f;
   --score-low: #8a3a34;
 
+  /* Two comparison-series colours (Resume A vs Resume B) */
+  --cmp-a: #b0823c;
+  --cmp-b: #3f6f6b;
+
   --chip-match-bg: rgba(53, 84, 63, 0.1);
   --chip-match-ink: #35543f;
   --danger: #8a3a34;
@@ -62,6 +66,9 @@
   --score-strong: #57c08a;
   --score-mid: #e8a33d;
   --score-low: #e5715b;
+
+  --cmp-a: #e8a33d;
+  --cmp-b: #4fb3ad;
 
   --chip-match-bg: rgba(232, 163, 61, 0.14);
   --chip-match-ink: #e8a33d;

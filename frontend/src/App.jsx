@@ -3,6 +3,7 @@ import Landing from "./pages/Landing";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import Dashboard from "./pages/Dashboard";
+import Compare from "./pages/Compare";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
 import Setting from "./pages/Setting";
@@ -23,6 +24,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/compare"
+        element={
+          <ProtectedRoute>
+            <Compare />
           </ProtectedRoute>
         }
       />

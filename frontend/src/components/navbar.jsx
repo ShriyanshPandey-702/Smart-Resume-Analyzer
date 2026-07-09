@@ -11,12 +11,14 @@ import {
   FiClock,
   FiUser,
   FiSettings,
+  FiGitPullRequest,
   FiMenu,
   FiX,
 } from "react-icons/fi";
 
 const links = [
   { to: "/dashboard", label: "Dashboard", icon: FiHome, end: true },
+  { to: "/compare", label: "Compare", icon: FiGitPullRequest },
   { to: "/history", label: "History", icon: FiClock },
   { to: "/profile", label: "Profile", icon: FiUser },
   { to: "/settings", label: "Settings", icon: FiSettings },

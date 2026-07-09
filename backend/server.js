@@ -6,6 +6,7 @@ const { clerkMiddleware } = require("@clerk/express");
 const connectDB = require("./config/db");
 
 const resumeRoutes = require("./routes/resumeRoutes");
+const compareRoutes = require("./routes/compareRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(express.json());  //Express automatically converts the JSON into a JavaS
 app.use(clerkMiddleware());
 
 app.use("/api/resume", resumeRoutes);
+app.use("/api/compare", compareRoutes);
 
 
 app.get("/", (req, res) => {
