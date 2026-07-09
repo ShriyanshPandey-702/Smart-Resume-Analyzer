@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import {
   FiSun,
@@ -43,6 +43,11 @@ function Landing() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const isAuthed = !!localStorage.getItem("token");
+
+  // Signed-in users skip the marketing page and go straight to the dashboard
+  if (isAuthed) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">

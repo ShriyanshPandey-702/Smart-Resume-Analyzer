@@ -14,3 +14,5 @@ uploads/
 
 # Mac files
 .DS_Store
+# Generated reports
+*.pdf
