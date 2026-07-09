@@ -31,7 +31,7 @@ function Navbar() {
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const doLogout = () => {
-    signOut(() => navigate("/"));
+    signOut({ redirectUrl: "/" });
   };
 
   const linkBase =
