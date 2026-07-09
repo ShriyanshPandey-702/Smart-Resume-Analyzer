@@ -64,7 +64,9 @@ function Settings() {
           await api.delete("/resume/history").catch(() => {});
           await deleteUser();
           toast.success("Account deleted");
-          navigate("/");
+          // Hard redirect to the landing page (avoids the ProtectedRoute
+          // bouncing to /sign-in once the session is gone).
+          window.location.href = "/";
         } catch (error) {
           // User cancelling the verification also lands here — keep it quiet-ish
           if (error?.message !== "reverification-cancelled") {
